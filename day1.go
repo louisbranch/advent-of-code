@@ -17,9 +17,11 @@ type position struct {
 }
 
 func Move(command string) (int, error) {
-	var p position
+	visited := make(map[coordinates]bool)
+	p := &position{}
 
 	cmds := strings.Split(command, ", ")
+LOOP:
 	for _, cmd := range cmds {
 		if len(cmd) < 2 {
 			return 0, fmt.Errorf("wrong command %s", command)
@@ -32,22 +34,29 @@ func Move(command string) (int, error) {
 		}
 
 		p.rotate(d)
-		p.walk(t)
+
+		for i := 0; i < t; i++ {
+			p.walk()
+			if visited[p.coordinates] {
+				break LOOP
+			}
+			visited[p.coordinates] = true
+		}
 	}
 
 	return p.distance(), nil
 }
 
-func (p *position) walk(times int) {
+func (p *position) walk() {
 	switch p.angle {
 	case 0:
-		p.y += times
+		p.y += 1
 	case 90:
-		p.x += times
+		p.x += 1
 	case 180:
-		p.y -= times
+		p.y -= 1
 	case 270:
-		p.x -= times
+		p.x -= 1
 	}
 }
 
@@ -69,9 +78,16 @@ func (p *position) rotate(direction byte) {
 }
 
 func (p *position) distance() int {
-	d := p.x + p.y
-	if d < 0 {
-		d *= -1
+	x := p.x
+	y := p.y
+
+	if x < 0 {
+		x *= -1
 	}
-	return d
+
+	if y < 0 {
+		y *= -1
+	}
+
+	return x + y
 }
