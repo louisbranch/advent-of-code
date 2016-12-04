@@ -37,11 +37,37 @@ func ValidTriangles(inputs string) (int, error) {
 		}
 	}
 
-	//"810  679   10"
-
 	return count, nil
 }
 
+func ValidTrianglesColumns(inputs string) (int, error) {
+	count := 0
+
+	cols := [3][]int{}
+
+	for _, line := range strings.Split(inputs, "\n") {
+
+		for i, val := range strings.Fields(line) {
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				return 0, fmt.Errorf("invalid input %s", line)
+			}
+			cols[i%3] = append(cols[i%3], n)
+		}
+
+	}
+
+	list := append(append(cols[0], cols[1]...), cols[2]...)
+
+	for i := 0; i < len(list); i += 3 {
+		t := triangle{a: list[i], b: list[i+1], c: list[i+2]}
+		if t.Valid() {
+			count++
+		}
+	}
+
+	return count, nil
+}
 func (t triangle) Valid() bool {
 	return t.a+t.b > t.c &&
 		t.b+t.c > t.a &&
