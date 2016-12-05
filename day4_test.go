@@ -2,99 +2,11 @@ package main
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func TestNewRoom(t *testing.T) {
-	type args struct {
-		code string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *room
-		wantErr bool
-	}{
-		{
-			name: "valid code pattern",
-			args: args{code: "aaaaa-bbb-z-y-x-123[abxyz]"},
-			want: &room{
-				code:     []string{"aaaaa", "bbb", "z", "y", "x"},
-				id:       123,
-				checksum: "abxyz",
-			},
-			wantErr: false,
-		},
-		{
-			name:    "invalid code pattern",
-			args:    args{code: "aaaaa-bbb-z-y-x-123abxyz"},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewRoom(tt.args.code)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewRoom() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewRoom() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_room_Valid(t *testing.T) {
-	tests := []struct {
-		code string
-		want bool
-	}{
-		{
-			code: "aaaaa-bbb-z-y-x-123[abxyz]",
-			want: true,
-		},
-		{
-			code: "a-b-c-d-e-f-g-h-987[abcde]",
-			want: true,
-		},
-		{
-			code: "not-a-real-room-404[oarel] ",
-			want: true,
-		},
-		{
-			code: "totally-real-room-200[decoy]",
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.code, func(t *testing.T) {
-			r, err := NewRoom(tt.code)
-			if err != nil {
-				t.Errorf("NewRoom() error = %v", err)
-				return
-			}
-			if got := r.Valid(); got != tt.want {
-				t.Errorf("room.Valid() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestValidRooms(t *testing.T) {
-	type args struct {
-		input string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    int
-		wantErr bool
-	}{
-		{
-			name: "parse list of rooms",
-			args: args{
-				input: `hqcfqwydw-fbqijys-whqii-huiuqhsx-660[qhiwf]
+const sample = `hqcfqwydw-fbqijys-whqii-huiuqhsx-660[qhiwf]
 oxjmxdfkd-pzxsbkdbo-erkq-ixyloxqlov-913[xodkb]
 bpvctixr-eaphixr-vgphh-gthtpgrw-947[smrkl]
 iwcjapey-lhwopey-cnwoo-wymqeoepekj-992[eowpy]
@@ -1046,7 +958,98 @@ jshzzpmplk-kfl-klclsvwtlua-331[lkpsz]
 ujoon-eaphixr-vgphh-prfjxhxixdc-193[hyzjx]
 dfcxsqhwzs-qobrm-zcuwghwqg-168[qwcgh]
 bqvvu-ydkykhwpa-klanwpekjo-966[kapvw]
-aoubshwq-pibbm-kcfygvcd-740[wnucy]`,
+aoubshwq-pibbm-kcfygvcd-740[wnucy]`
+
+func TestNewRoom(t *testing.T) {
+	type args struct {
+		code string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *room
+		wantErr bool
+	}{
+		{
+			name: "valid code pattern",
+			args: args{code: "aaaaa-bbb-z-y-x-123[abxyz]"},
+			want: &room{
+				code:     []string{"aaaaa", "bbb", "z", "y", "x"},
+				id:       123,
+				checksum: "abxyz",
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid code pattern",
+			args:    args{code: "aaaaa-bbb-z-y-x-123abxyz"},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewRoom(tt.args.code)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewRoom() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewRoom() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_room_Valid(t *testing.T) {
+	tests := []struct {
+		code string
+		want bool
+	}{
+		{
+			code: "aaaaa-bbb-z-y-x-123[abxyz]",
+			want: true,
+		},
+		{
+			code: "a-b-c-d-e-f-g-h-987[abcde]",
+			want: true,
+		},
+		{
+			code: "not-a-real-room-404[oarel] ",
+			want: true,
+		},
+		{
+			code: "totally-real-room-200[decoy]",
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.code, func(t *testing.T) {
+			r, err := NewRoom(tt.code)
+			if err != nil {
+				t.Errorf("NewRoom() error = %v", err)
+				return
+			}
+			if got := r.Valid(); got != tt.want {
+				t.Errorf("room.Valid() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestValidRooms(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    int
+		wantErr bool
+	}{
+		{
+			name: "parse list of rooms",
+			args: args{
+				input: sample,
 			},
 			want: 245102,
 		},
@@ -1063,4 +1066,44 @@ aoubshwq-pibbm-kcfygvcd-740[wnucy]`,
 			}
 		})
 	}
+}
+
+func Test_room_EncryptedName(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{
+			input: "qzmt-zixmtkozy-ivhz-343[abcde]",
+			want:  "very encrypted name",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			r, err := NewRoom(tt.input)
+			if err != nil {
+				t.Errorf("EncryptedName() error = %v", err)
+				return
+			}
+			if got := r.EncryptedName(); got != tt.want {
+				t.Errorf("room.EncryptedName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFindNorthPole(t *testing.T) {
+	for _, line := range strings.Split(sample, "\n") {
+		r, err := NewRoom(line)
+
+		if err != nil {
+			t.Errorf("error %s", err)
+		}
+
+		if r.Valid() && strings.Index(r.EncryptedName(), "north") != -1 {
+			t.Log(r, r.EncryptedName())
+		}
+
+	}
+
 }

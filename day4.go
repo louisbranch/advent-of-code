@@ -109,6 +109,27 @@ func (r *room) Valid() bool {
 }
 
 func (r *room) EncryptedName() string {
+	name := ""
 
-	return ""
+	for i, c := range r.code {
+		for _, l := range c {
+			for j := 0; j < r.id; j++ {
+				l = shiftRune(l)
+			}
+			name += string(l)
+		}
+
+		if i != len(r.code)-1 {
+			name += " "
+		}
+	}
+
+	return name
+}
+
+func shiftRune(r rune) rune {
+	if r == 'z' {
+		return 'a'
+	}
+	return r + 1
 }
