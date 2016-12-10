@@ -2,7 +2,27 @@ package main
 
 import "strings"
 
-func Noise(input string) (secret string) {
+func NoiseMax(input string) (secret string) {
+	compare := func(prev, next int) bool {
+		return prev < next
+	}
+
+	return noise(input, compare)
+}
+
+func NoiseMin(input string) (secret string) {
+	compare := func(prev, next int) bool {
+		if prev == 0 {
+			return true
+		}
+
+		return next < prev
+	}
+
+	return noise(input, compare)
+}
+
+func noise(input string, compare func(prev, next int) bool) (secret string) {
 	lines := strings.Split(input, "\n")
 
 	if len(lines) == 0 {
@@ -19,17 +39,17 @@ func Noise(input string) (secret string) {
 			m[c] += 1
 		}
 
-		var most byte
-		n := 0
+		var code byte
+		prev := 0
 
-		for k, v := range m {
-			if v > n {
-				n = v
-				most = k
+		for char, next := range m {
+			if compare(prev, next) {
+				prev = next
+				code = char
 			}
 		}
 
-		secret += string(most)
+		secret += string(code)
 	}
 
 	return

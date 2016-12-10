@@ -4,8 +4,9 @@ import "testing"
 
 func TestNoise(t *testing.T) {
 	testCases := []struct {
-		input    string
-		response string
+		input string
+		most  string
+		least string
 	}{
 		{
 			input: `eedadn
@@ -24,7 +25,8 @@ vntsnd
 vrdear
 dvrsen
 enarar`,
-			response: "easter",
+			most:  "easter",
+			least: "advent",
 		},
 		{
 			input: `jpnomsle
@@ -599,14 +601,19 @@ eoqtkvpo
 wxyqshnk
 vritmuaz
 nzqlrzfn`,
-			response: "tzstqsua",
+			most:  "tzstqsua",
+			least: "myregdnr",
 		},
 	}
 
 	for _, tt := range testCases {
-		got := Noise(tt.input)
-		if tt.response != got {
-			t.Errorf("Noise(%s) %s != %s", tt.input, tt.response, got)
+		most := NoiseMax(tt.input)
+		least := NoiseMin(tt.input)
+		if tt.most != most {
+			t.Errorf("NoiseMax(%s) %s != %s", tt.input, tt.most, most)
+		}
+		if tt.least != least {
+			t.Errorf("NoiseMin(%s) %s != %s", tt.input, tt.least, least)
 		}
 	}
 }
