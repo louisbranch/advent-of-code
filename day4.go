@@ -113,7 +113,7 @@ func (r *room) EncryptedName() string {
 
 	for i, c := range r.code {
 		for _, l := range c {
-			for j := 0; j < r.id; j++ {
+			for j := 0; j < r.id%26; j++ {
 				l = shiftRune(l)
 			}
 			name += string(l)
